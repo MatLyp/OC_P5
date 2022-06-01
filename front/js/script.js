@@ -1,29 +1,4 @@
-const apiUrl = "http://localhost:3000/api/products";
-
-function getData() {
-    fetch(apiUrl)
-        .then (function(res) {
-            if (res.ok) {
-                return res.json();
-            }
-        })
-        .then (function(value) {
-            for (let elem of value) {
-                createCard(elem);
-            }
-        })
-        .catch (function(err) {
-            //Une erreur s'est produite
-        })
-}
-
-// async function getData() {       // Une autre manière de request l'api
-//     const response = await fetch(apiUrl);
-//     const value = await response.json();
-//     for (let elem of value) {
-//         createCard(elem);
-//     }
-// }
+const apiUrl = "http://localhost:3000/api/products/";
 
 function createCard(product) {
 
@@ -49,29 +24,34 @@ function createCard(product) {
     document.getElementById("items").appendChild(newProductLink);
     newProductLink.appendChild(newProductArticle);
     newProductArticle.append(newProductImg, newProductTitle, newProductParagraph);
-
-    // const el1 = document.getElementsByTagName("a").append(newProductArticle);
-    // const el2 = document.getElementsByTagName("article").append(newProductImg);
 }
 
-getData();
+function getData() {
+    fetch(apiUrl)
+        .then (function(res) {
+            if (res.ok) {
+                return res.json();
+            }
+        })
+        .then (function(value) {
+            for (let elem of value) {
+                createCard(elem);
+            }
+        })
+        .catch (function(err) {
+            // Une erreur s'est produite
+            console.log(err);
+        })
+}
 
-
-
-
-
-
-
-// const apiUrl = "http://localhost:3000/api/products";
-// async function getData() {
+// async function getData() {       // Une autre manière de request l'api
 //     const response = await fetch(apiUrl);
-//     const data = await response.json();
-//     for (let elem of data) {
-//         console.log(elem.name);
+//     const value = await response.json();
+//     for (let elem of value) {
+//         createCard(elem);
 //     }
 // }
-// getData();
 
-
+getData();
 
 

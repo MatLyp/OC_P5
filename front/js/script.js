@@ -1,6 +1,6 @@
 const apiUrl = "http://localhost:3000/api/products/";
 
-function createCard(product) {
+function createHomeCards(product) {
 
     const newProductLink = document.createElement("a");
     newProductLink.setAttribute("href", `./product.html?id=${product._id}`);
@@ -35,7 +35,7 @@ function getData() {
         })
         .then (function(value) {
             for (let elem of value) {
-                createCard(elem);
+                createHomeCards(elem);
             }
         })
         .catch (function(err) {

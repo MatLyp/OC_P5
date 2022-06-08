@@ -30,29 +30,56 @@ function getProduct() {
 function addToCart(productDatas){
     let quantity = document.getElementById("quantity").value;
     let colorSelect = document.getElementById("colors").value;
-    let cart = [];
 
+    let cart = [];
+    
     if (quantity <= 0 || colorSelect == ""){
         alert("Veuillez choisir une couleur et saisir la quantité pour ajouter au panier");
-    }
-    else {
+    } else {
+
+        // let parsedCart = [];
+        // parsedCart.push(JSON.parse(localStorage.getItem("cart")));
+        // console.log(typeof parsedCart);
+        // if(parsedCart!=null){
+            
+        //     parsedCart.forEach((e) => {
+        //         cart.push(e);
+        //         // if(parsedCart.e.id != `${productDatas._id}`)
+        //         console.log(parsedCart.e.id);
+        //     })
+        // }
+
         // if() Lorsqu’on ajoute un produit au panier, si celui-ci était déjà présent dans le panier (même id + même couleur), on incrémente simplement la quantité du produit correspondant dans l’array
+
+    //    let a = JSON.parse(localStorage.getItem("panier"));
+    //    if (getProductId() == a.id && colorSelect == a.clr) {
+    //        alert("same!");
+    //    }
+
         let objAddProduct = {
             id: `${productDatas._id}`,
             qte: quantity,
             clr: colorSelect
         }
 
-        cart.push(JSON.stringify(objAddProduct));
-        localStorage.setItem("obj", cart);
-        console.log(cart[0]);
+        cart.push(objAddProduct);
+        localStorage.setItem("cart", JSON.stringify(cart));
+
+        
+        // for(i=0;i<cart.length;i++){
+
+        //     console.log(cart[i]);
+        // }
+
+
+
         // localStorage.setItem("obj", JSON.stringify(objAddProduct));
         // console.log(JSON.parse(localStorage.getItem("obj")));
 
         alert("Ajouté au panier");
     }
-    console.log(quantity);
-    console.log(colorSelect);
+    // console.log(quantity);
+    // console.log(colorSelect);
 }
 
 function createProductElems(productInfo) {
@@ -81,3 +108,4 @@ getProduct();
 
 // console.log(getProductId());
 // console.log(apiUrl + getProductId());
+//  console.log(JSON.parse(localStorage.getItem("panier")).id);

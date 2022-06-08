@@ -1,5 +1,6 @@
 const apiUrl = "http://localhost:3000/api/products/";
 
+//commentaires !!
 function createHomeCards(product) {
 
     const newProductLink = document.createElement("a");
@@ -15,17 +16,16 @@ function createHomeCards(product) {
     newProductTitle.setAttribute("class", "productName");
     newProductTitle.innerText = `${product.name}`;
     
-
     const newProductParagraph = document.createElement("p");
     newProductParagraph.setAttribute("class", "productDescription");
     newProductParagraph.innerText = `${product.description}`;
-
 
     document.getElementById("items").appendChild(newProductLink);
     newProductLink.appendChild(newProductArticle);
     newProductArticle.append(newProductImg, newProductTitle, newProductParagraph);
 }
 
+//commentaires !!
 function getData() {
     fetch(apiUrl)
         .then (function(res) {
@@ -34,6 +34,7 @@ function getData() {
             }
         })
         .then (function(value) {
+            //commentaires!!
             for (let elem of value) {
                 createHomeCards(elem);
             }
@@ -48,7 +49,7 @@ function getData() {
 //     const response = await fetch(apiUrl);
 //     const value = await response.json();
 //     for (let elem of value) {
-//         createCard(elem);
+//         createHomeCard(elem);
 //     }
 // }
 

@@ -1,5 +1,5 @@
 const apiUrl = "http://localhost:3000/api/products/";
-// let t = localStorage.getItem("panier");
+
 
 function getData() {
     fetch(apiUrl)
@@ -10,11 +10,7 @@ function getData() {
         })
         .then (function(value) {
             //commentaires!!
-            
             createCartElems(value);
-            // for(i=0; i<localStorage.length;i++){
-            //     createCartElems();
-            // }
         })
         .catch (function(err) {
             // Une erreur s'est produite
@@ -32,7 +28,6 @@ function createCartElems(cartProduct) {
     // cart.push(JSON.parse(localStorage.getItem("cart")));
     // console.log(cart);
 
-    
 
     storedCart.forEach( element => {
 
@@ -94,7 +89,7 @@ function createCartElems(cartProduct) {
         createCartInputQty.setAttribute("name", "itemQuantity");
         createCartInputQty.setAttribute("min", "1");
         createCartInputQty.setAttribute("max", "100");
-        createCartInputQty.setAttribute("value", element.qte);
+        createCartInputQty.setAttribute("value", element.qty);
 
         createCartContentSettingsQty.append(createCartContentQty, createCartInputQty);
 
@@ -116,17 +111,6 @@ function createCartElems(cartProduct) {
 
 }
 
-
-// for(i=0; i<localStorage.length;i++){
-
-//     createCartElems();
-// }
-// let a = [];
-// let a = localStorage.getItem("panier");
-// let b = JSON.parse(a);
-// console.log(b.id);
-// console.log(localStorage.getItem("panier"));
-
 getData();
 
-// console.log(localStorage.key(0));
+

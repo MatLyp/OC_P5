@@ -8,87 +8,46 @@ function getProductId() {
     return productId;
 }
 
-function getProduct() {
-    fetch(apiUrl + getProductId())
-        .then (function(res) {
-            if (res.ok) {
-                return res.json();
-            }
-        })
-        .then (function(value) {
-            //création de la page produit
-            createProductElems(value);
-            //détection du click sur bouton "ajouter au panier"
-            document.getElementById("addToCart").addEventListener("click", () => {
-                //appel de la fonction qui ajoute le produit au panier (couleur/quantité) en stockant les information dans le localStorage.
-                addToCart(value);
-            });
-        })
-        .catch (function(err) {
-            // Une erreur s'est produite
-            console.log(err);
-        })
-}
-
+// fonction qui ajoute le produit au panier (couleur/quantité) en stockant les information dans le localStorage.
 function addToCart(productDatas){
-    let quantity = document.getElementById("quantity").value;
+
+    let quantitySelect = document.getElementById("quantity").value;
     let colorSelect = document.getElementById("colors").value;
 
     let cart = [];
-
-    // let count = 0;
-    // let isInCart = false;
-
-    if (quantity <= 0 || colorSelect == ""){
+    //Lorsqu’on ajoute un produit au panier, si celui-ci était déjà présent dans le panier (même id + même couleur), on incrémente simplement la quantité du produit correspondant dans le tableau    
+    if (quantitySelect <= 0 || colorSelect == ""){
         alert("Veuillez choisir une couleur et saisir la quantité pour ajouter au panier");
     } else {
-
+        // si le panier n'est pas vide, on recupère les éléments du panier présent dans le localStorage
         if (localStorage.getItem("cart") != null ) {
             cart = (JSON.parse(localStorage.getItem("cart")));
-            // console.log(cart);
         }
 
-        //Lorsqu’on ajoute un produit au panier, si celui-ci était déjà présent dans le panier (même id + même couleur), on incrémente simplement la quantité du produit correspondant dans l’array
-        // !!! Utiliser methode array.find ou array.findIndex !!!
-        // for (let product of cart){
-        //     if (product.id === getProductId() && product.clr === colorSelect) {
-        //         console.log(count);
-        //         console.log(cart[count].qty);
-
-        //         let nbrThisProduct = parseInt(cart[count].qty);
-        //         nbrThisProduct += parseInt(quantity);
-        //         // console.log(typeof quantity);
-        //         cart[count].qty = toString(nbrThisProduct);
-        //         quantity = toString(quantity);
-        //         // console.log(typeof cart[count].qty);
-        //         isInCart = true;
-        //         break;
-        //     }
-        //     count ++;
-        // }
-
-        // if (isInCart == false) {
-
+        const indexInCart = cart.findIndex((element) => element.id === `${productDatas._id}` && element.color === colorSelect);
+        // .findIndex() renvoi -1 si aucun element correspondant aux valeurs n'a été trouvé (id et couleur)
+        // s'il trouve un element, on incremente la quantité actuelle de l'element par la quantité choisie
+        // sinon, on créé un nouvel objet que l'on ajoute au tableau cart[].
+        if (indexInCart !== -1) {
+            let nbrThisProductInCart = parseInt(cart[indexInCart].quantity);
+            nbrThisProductInCart += parseInt(quantitySelect);
+            cart[indexInCart].quantity = nbrThisProductInCart.toString();
+            alert("Ajout de " + quantitySelect + " quantité");
+        } else {
             let objAddProduct = {
                 id: `${productDatas._id}`,
-                qty: quantity,
-                clr: colorSelect
+                quantity: quantitySelect,
+                color: colorSelect
             }
-    
             cart.push(objAddProduct);
-            localStorage.setItem("cart", JSON.stringify(cart));
+            alert("Ajouté au panier");
+        }
 
-        // }
-
-
-        // for(i=0; i<cart.length; i++) {
-        //     console.log(cart[i].qty);
-        // };
-
-        alert("Ajouté au panier");
+        localStorage.setItem("cart", JSON.stringify(cart));
     }
 }
 
+// fonction de création de la page produit en fonction du produit séléctionné
 function createProductElems(productInfo) {
 
     document.querySelector("title").textContent = `${productInfo.name}`;
@@ -111,8 +70,25 @@ function createProductElems(productInfo) {
     }
 }
 
-getProduct();
+function getProduct() {
+    fetch(apiUrl + getProductId())
+        .then (function(res) {
+            if (res.ok) {
+                return res.json();
+            }
+        })
+        .then (function(value) {
+            // création de la page produit
+            createProductElems(value);
+            // détection du click sur bouton "ajouter au panier" appel de la fonction correspondante
+            document.getElementById("addToCart").addEventListener("click", () => {
+                addToCart(value);
+            });
+        })
+        .catch (function(err) {
+            // Une erreur s'est produite
+            console.log(err);
+        })
+}
 
-// console.log(getProductId());
-// console.log(apiUrl + getProductId());
-//  console.log(JSON.parse(localStorage.getItem("panier")).id);
+getProduct();

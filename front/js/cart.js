@@ -11,6 +11,7 @@ function getData() {
         .then (function(value) {
             //commentaires!!
             createCartElems(value);
+
         })
         .catch (function(err) {
             // Une erreur s'est produite
@@ -18,9 +19,19 @@ function getData() {
         })
 }
 
+// document.getElementById("deleteItem").addEventListener("click", deleteCartElems);
+// document.getElementById("").addEventListener("change", );
+
+// function deleteCartElems() {
+
+    
+// }
+
 
 function createCartElems(cartProduct) {
 
+    let totalPrice = 0;
+    let totalQuantity = 0;
     let storedCart = JSON.parse(localStorage.getItem("cart"));
     console.log(storedCart);
 
@@ -28,17 +39,14 @@ function createCartElems(cartProduct) {
     // cart.push(JSON.parse(localStorage.getItem("cart")));
     // console.log(cart);
 
-
-    storedCart.forEach( element => {
+    storedCart.forEach(element => {
 
         let index = cartProduct.findIndex( e => e._id === element.id);
-        console.log(index);
-        console.log(cartProduct[index]._id);
 
         const createCartArticle = document.createElement("article");
         createCartArticle.className = "cart__item"
         createCartArticle.setAttribute("data-id", element.id);
-        createCartArticle.setAttribute("data-color", element.clr);
+        createCartArticle.setAttribute("data-color", element.color);
         document.getElementById("cart__items").appendChild(createCartArticle);
     
         const createCartDivImg = document.createElement("div");
@@ -65,7 +73,7 @@ function createCartElems(cartProduct) {
         const createCartContentTitle = document.createElement("h2");
         createCartContentTitle.innerText = `${cartProduct[index].name}`;
         const createCartContentColor = document.createElement("p");
-        createCartContentColor.innerText = element.clr;
+        createCartContentColor.innerText = element.color;
         const createCartContentPrice = document.createElement("p");
         createCartContentPrice.innerText = `${cartProduct[index].price}` + " €";
 
@@ -89,7 +97,7 @@ function createCartElems(cartProduct) {
         createCartInputQty.setAttribute("name", "itemQuantity");
         createCartInputQty.setAttribute("min", "1");
         createCartInputQty.setAttribute("max", "100");
-        createCartInputQty.setAttribute("value", element.qty);
+        createCartInputQty.setAttribute("value", element.quantity);
 
         createCartContentSettingsQty.append(createCartContentQty, createCartInputQty);
 
@@ -104,13 +112,13 @@ function createCartElems(cartProduct) {
 
         createCartDivContentSettingsDelete.appendChild(createCartDeleteButton);
 
-        // console.log(`${cartProduct[index].imageUrl}`);
-        // console.log(`${cartProduct[index].altTxt}`);
+        totalQuantity += parseInt(element.quantity);
+        totalPrice += parseInt(`${cartProduct[index].price}`) * element.quantity;
     })
 
-
+    document.getElementById("totalQuantity").innerText = totalQuantity;
+    document.getElementById("totalPrice").innerText = totalPrice;
 }
 
 getData();
-
 

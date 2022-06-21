@@ -8,30 +8,45 @@ function getProductId() {
     return productId;
 }
 
+function getCart(){
+    let cart = localStorage.getItem("cart");
+    if (cart == null) {
+        return [];
+    } else {
+        return JSON.parse(cart);
+    }
+}
+
+function saveCart(cart) {
+    localStorage.setItem("cart", JSON.stringify(cart));
+}
+
+// function addToCart(product) {
+//     let cart = getCart();
+//     cart.push(product);
+//     saveCart(cart);
+// }
+
 // fonction qui ajoute le produit au panier (couleur/quantité) en stockant les information dans le localStorage.
 function addToCart(productDatas){
 
     let quantitySelect = document.getElementById("quantity").value;
     let colorSelect = document.getElementById("colors").value;
 
-    let cart = [];
     //Lorsqu’on ajoute un produit au panier, si celui-ci était déjà présent dans le panier (même id + même couleur), on incrémente simplement la quantité du produit correspondant dans le tableau    
     if (quantitySelect <= 0 || colorSelect == ""){
         alert("Veuillez choisir une couleur et saisir la quantité pour ajouter au panier");
     } else {
-        // si le panier n'est pas vide, on recupère les éléments du panier présent dans le localStorage
-        if (localStorage.getItem("cart") != null ) {
-            cart = (JSON.parse(localStorage.getItem("cart")));
-        }
+        let cart = getCart();
 
         const indexInCart = cart.findIndex((element) => element.id === `${productDatas._id}` && element.color === colorSelect);
         // .findIndex() renvoi -1 si aucun element correspondant aux valeurs n'a été trouvé (id et couleur)
         // s'il trouve un element, on incremente la quantité actuelle de l'element par la quantité choisie
-        // sinon, on créé un nouvel objet que l'on ajoute au tableau cart[].
+        // sinon, on créé un nouvel objet que l'on ajoute au tableau cart.
         if (indexInCart !== -1) {
-            let nbrThisProductInCart = parseInt(cart[indexInCart].quantity);
-            nbrThisProductInCart += parseInt(quantitySelect);
-            cart[indexInCart].quantity = nbrThisProductInCart.toString();
+            let productQuantity = parseInt(cart[indexInCart].quantity);
+            productQuantity += parseInt(quantitySelect);
+            cart[indexInCart].quantity = productQuantity.toString();
             alert("Ajout de " + quantitySelect + " quantité");
         } else {
             let objAddProduct = {
@@ -43,7 +58,7 @@ function addToCart(productDatas){
             alert("Ajouté au panier");
         }
 
-        localStorage.setItem("cart", JSON.stringify(cart));
+        saveCart(cart);
     }
 }
 

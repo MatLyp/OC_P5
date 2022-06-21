@@ -1,7 +1,7 @@
 const apiUrl = "http://localhost:3000/api/products/";
 
-
 function getData() {
+
     fetch(apiUrl)
         .then (function(res) {
             if (res.ok) {
@@ -19,25 +19,52 @@ function getData() {
         })
 }
 
-// document.getElementById("deleteItem").addEventListener("click", deleteCartElems);
-// document.getElementById("").addEventListener("change", );
+function getCart(){
 
-// function deleteCartElems() {
+    let cart = localStorage.getItem("cart");
+    if (cart == null) {
+        return [];
+    } else {
+        return JSON.parse(cart);
+    }
+}
 
-    
-// }
+function saveCart(cart) {
 
+    localStorage.setItem("cart", JSON.stringify(cart));
+}
+
+function deleteCartElems(event) {
+
+    let cart = getCart();
+    let articleHtmlElem = event.target.closest('article');
+    const indexInCart = cart.findIndex((element) => element.id === articleHtmlElem.dataset.id && element.color === articleHtmlElem.dataset.color);
+    cart.splice(indexInCart, 1);
+    saveCart(cart);
+
+    while (articleHtmlElem.lastElementChild){
+        articleHtmlElem.removeChild(articleHtmlElem.lastElementChild);
+    }
+    articleHtmlElem.remove();
+}
+
+function changeQuantity(event) {
+
+    let cart = getCart();
+    let newQuantity = event.target.value;
+    let articleHtmlElem = event.target.closest('article');
+    const indexInCart = cart.findIndex((element) => element.id === articleHtmlElem.dataset.id && element.color === articleHtmlElem.dataset.color);
+    cart[indexInCart].quantity = newQuantity;
+    console.log(cart[indexInCart].quantity);
+
+    saveCart(cart);
+}
 
 function createCartElems(cartProduct) {
 
     let totalPrice = 0;
     let totalQuantity = 0;
-    let storedCart = JSON.parse(localStorage.getItem("cart"));
-    console.log(storedCart);
-
-    // let cart = [];
-    // cart.push(JSON.parse(localStorage.getItem("cart")));
-    // console.log(cart);
+    let storedCart = getCart();
 
     storedCart.forEach(element => {
 
@@ -113,12 +140,22 @@ function createCartElems(cartProduct) {
         createCartDivContentSettingsDelete.appendChild(createCartDeleteButton);
 
         totalQuantity += parseInt(element.quantity);
-        totalPrice += parseInt(`${cartProduct[index].price}`) * element.quantity;
+        totalPrice += parseInt(`${cartProduct[index].price}`) * element.quantity;       
     })
 
     document.getElementById("totalQuantity").innerText = totalQuantity;
     document.getElementById("totalPrice").innerText = totalPrice;
+
+    let itemQty = document.getElementsByClassName("itemQuantity");
+    for (let i=0; i<itemQty.length; i++) {
+        itemQty[i].addEventListener("change", changeQuantity);
+        console.log(itemQty[i]);
+    }
+
+    let deleteItem = document.getElementsByClassName("deleteItem");
+    for (let i=0; i<deleteItem.length; i++) {
+        deleteItem[i].addEventListener("click", deleteCartElems);
+    }
 }
 
 getData();
-

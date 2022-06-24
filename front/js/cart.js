@@ -1,6 +1,7 @@
 const apiUrl = "http://localhost:3000/api/products/";
 
-function getData() {
+
+function getData(...funct) {
 
     fetch(apiUrl)
         .then (function(res) {
@@ -10,7 +11,19 @@ function getData() {
         })
         .then (function(value) {
             //commentaires!!
-            createCartElems(value);
+            for(let i=0; i<funct.length; i++){
+                funct[i](value);
+            }
+
+            let deleteItem = document.getElementsByClassName("deleteItem");
+            for (let i=0; i<deleteItem.length; i++) {
+                deleteItem[i].addEventListener("click", deleteCartElems);
+            }
+        
+            let itemQty = document.getElementsByClassName("itemQuantity");
+            for (let i=0; i<itemQty.length; i++) {
+                itemQty[i].addEventListener("change", changeQuantity);
+            }
 
         })
         .catch (function(err) {
@@ -18,6 +31,7 @@ function getData() {
             console.log(err);
         })
 }
+
 
 function getCart(){
 
@@ -29,24 +43,12 @@ function getCart(){
     }
 }
 
+
 function saveCart(cart) {
 
     localStorage.setItem("cart", JSON.stringify(cart));
 }
 
-function deleteCartElems(event) {
-
-    let cart = getCart();
-    let articleHtmlElem = event.target.closest('article');
-    const indexInCart = cart.findIndex((element) => element.id === articleHtmlElem.dataset.id && element.color === articleHtmlElem.dataset.color);
-    cart.splice(indexInCart, 1);
-    saveCart(cart);
-
-    while (articleHtmlElem.lastElementChild){
-        articleHtmlElem.removeChild(articleHtmlElem.lastElementChild);
-    }
-    articleHtmlElem.remove();
-}
 
 function changeQuantity(event) {
 
@@ -55,15 +57,59 @@ function changeQuantity(event) {
     let articleHtmlElem = event.target.closest('article');
     const indexInCart = cart.findIndex((element) => element.id === articleHtmlElem.dataset.id && element.color === articleHtmlElem.dataset.color);
     cart[indexInCart].quantity = newQuantity;
-    console.log(cart[indexInCart].quantity);
-
     saveCart(cart);
+
+    // displayTotalCartQuantity();
 }
+
+
+function displayTotalCartQuantity() {
+
+    let totalQuantity = 0;
+    let storedCart = getCart();
+
+    storedCart.forEach(element => {
+        totalQuantity += parseInt(element.quantity);
+    });
+    document.getElementById("totalQuantity").innerText = totalQuantity;
+}
+
+
+function displayTotalCartPrice(cartProduct) {
+
+    let totalPrice = 0;
+    let storedCart = getCart();
+
+    storedCart.forEach(element => {
+        let index = cartProduct.findIndex( e => e._id === element.id);
+        totalPrice += parseInt(`${cartProduct[index].price}`) * element.quantity;
+    });
+
+    document.getElementById("totalPrice").innerText = totalPrice;
+}
+
+
+function deleteCartElems(event) {
+
+    let cart = getCart();
+    let articleHtmlElem = event.target.closest('article');
+
+    const indexInCart = cart.findIndex((element) => element.id === articleHtmlElem.dataset.id && element.color === articleHtmlElem.dataset.color);
+
+    cart.splice(indexInCart, 1);
+    saveCart(cart);
+
+    while (articleHtmlElem.lastElementChild){
+        articleHtmlElem.removeChild(articleHtmlElem.lastElementChild);
+    }
+    articleHtmlElem.remove();
+
+    // displayTotalCartQuantity();
+}
+
 
 function createCartElems(cartProduct) {
 
-    let totalPrice = 0;
-    let totalQuantity = 0;
     let storedCart = getCart();
 
     storedCart.forEach(element => {
@@ -138,24 +184,88 @@ function createCartElems(cartProduct) {
         createCartDeleteButton.innerText = "Supprimer";
 
         createCartDivContentSettingsDelete.appendChild(createCartDeleteButton);
-
-        totalQuantity += parseInt(element.quantity);
-        totalPrice += parseInt(`${cartProduct[index].price}`) * element.quantity;       
+      
     })
 
-    document.getElementById("totalQuantity").innerText = totalQuantity;
-    document.getElementById("totalPrice").innerText = totalPrice;
 
-    let itemQty = document.getElementsByClassName("itemQuantity");
-    for (let i=0; i<itemQty.length; i++) {
-        itemQty[i].addEventListener("change", changeQuantity);
-        console.log(itemQty[i]);
-    }
-
-    let deleteItem = document.getElementsByClassName("deleteItem");
-    for (let i=0; i<deleteItem.length; i++) {
-        deleteItem[i].addEventListener("click", deleteCartElems);
-    }
 }
 
-getData();
+
+function formValidation() {
+
+    const NameRegex = /^(?=.{1,50}$)[a-z]+(?:[-\s][a-z]+)*$/i;
+    // ^                 - start of string
+    // (?=.{1,50}$)      - there must be 1 to 50 chars in the string
+    // [a-z]+            - 1 or more ASCII letters
+    // (?:[-\s][a-z]+)*  - 0 or more sequences of - or whitespace and 1 or more ASCII letters
+    // $                 - end of string
+    // /i                - a case insensitive modifier
+    let firstNameField = document.getElementById("firstName");
+    firstNameField.addEventListener("input", (e) => { 
+        let firstName = e.target.value;
+        if(NameRegex.test(firstName)){
+            document.getElementById("firstNameErrorMsg").innerText = "";
+        } else {
+            document.getElementById("firstNameErrorMsg").innerText = "Please enter a valid name (only letters and - or space are accepted).\nEx: Marie-Agathe.";
+            // firstNameField.setCustomValidity("Invalid field.");
+            // firstNameField.reportValidity();
+        }
+    });
+
+    let lastNameField = document.getElementById("lastName");
+    lastNameField.addEventListener("input", (e) => { 
+        let lastName = e.target.value;
+        if(NameRegex.test(lastName)){
+            document.getElementById("lastNameErrorMsg").innerText = "";
+        } else {
+            document.getElementById("lastNameErrorMsg").innerText = "Please enter a valid name (only letters and - or space are accepted).\nEx: Du Pont.";
+        }
+    });
+
+    const addressRegex = /^(?=.{1,100}$)[a-z0-9]+(?:([-.,\s]|[,][\s]|[.][\s])[a-z0-9]+)*$/i;
+    // ^                                        - start of string
+    // (?=.{1,100}$)                            - there must be 1 to 100 chars in the string
+    // [a-z0-9]+                                - 1 or more ASCII letters or number
+    // (?:([-.,\s]|[,][\s]|[.][\s])[a-z0-9]+)*  - 0 or more sequences of ((- . , or whitespace) or (. followed by whitespace) or (, followed by whitespace) and 1 or more ASCII letter or number)
+    // $                                        - end of string
+    // /i                                       - a case insensitive modifier
+    let addressField = document.getElementById("address");
+    addressField.addEventListener("input", (e) => { 
+        let address = e.target.value;
+        if(addressRegex.test(address)){
+            document.getElementById("addressErrorMsg").innerText = "";
+        } else {
+            document.getElementById("addressErrorMsg").innerText = "Please enter a valid address (only letters, numbers and space - , or . are accepted).\nEx: 15 bis avenue du G.Leclerc, apt 12-C";
+        }
+    });
+
+    const cityRegex = /^(?=.{1,50}$)[a-z]+(?:[-\s][a-z]+)*$/i;
+    //same expression as nameRegex
+    let cityField = document.getElementById("city");
+    cityField.addEventListener("input", (e) => { 
+        let city = e.target.value;
+        if(cityRegex.test(city)){
+            document.getElementById("cityErrorMsg").innerText = "";
+        } else {
+            document.getElementById("cityErrorMsg").innerText = "Please enter a valid country name (only letters and - or space are accepted).\nEx: Nogent-sur-Seine.";
+        }
+    });
+
+    const emailRegex = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
+
+    let emailField = document.getElementById("email");
+    emailField.addEventListener("input", (e) => { 
+        let email = e.target.value;
+        if(emailRegex.test(email)){
+            document.getElementById("emailErrorMsg").innerText = "";
+        } else {
+            document.getElementById("emailErrorMsg").innerText = "Please enter a valid email (only letters and - or space are accepted).\nEx: Marie-Agathe.";
+        }
+    });
+
+}
+
+
+
+getData(createCartElems, displayTotalCartQuantity, displayTotalCartPrice);
+formValidation();

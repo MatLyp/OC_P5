@@ -59,7 +59,7 @@ function changeQuantity(event) {
     cart[indexInCart].quantity = newQuantity;
     saveCart(cart);
 
-    // displayTotalCartQuantity();
+    displayTotalCartQuantity();
 }
 
 
@@ -88,6 +88,17 @@ function displayTotalCartPrice(cartProduct) {
     document.getElementById("totalPrice").innerText = totalPrice;
 }
 
+// function displayTotalCartPrice(event) {  // test no api call function version
+
+//     let totalPrice = 0;
+    
+//     let articleHtmlElem = event.target.closest('article');
+
+//     const indexInCart = cart.findIndex((element) => element.id === articleHtmlElem.dataset.id && element.color === articleHtmlElem.dataset.color);
+
+//     document.getElementById("totalPrice").innerText = totalPrice;
+// }
+
 
 function deleteCartElems(event) {
 
@@ -104,9 +115,8 @@ function deleteCartElems(event) {
     }
     articleHtmlElem.remove();
 
-    // displayTotalCartQuantity();
+    displayTotalCartQuantity();
 }
-
 
 function createCartElems(cartProduct) {
 
@@ -187,7 +197,6 @@ function createCartElems(cartProduct) {
       
     })
 
-
 }
 
 
@@ -201,24 +210,28 @@ function formValidation() {
     // $                 - end of string
     // /i                - a case insensitive modifier
     let firstNameField = document.getElementById("firstName");
+    firstNameField.value = "";
     firstNameField.addEventListener("input", (e) => { 
         let firstName = e.target.value;
         if(NameRegex.test(firstName)){
             document.getElementById("firstNameErrorMsg").innerText = "";
+            firstNameField.setCustomValidity("");
         } else {
-            document.getElementById("firstNameErrorMsg").innerText = "Please enter a valid name (only letters and - or space are accepted).\nEx: Marie-Agathe.";
-            // firstNameField.setCustomValidity("Invalid field.");
-            // firstNameField.reportValidity();
+            document.getElementById("firstNameErrorMsg").innerText = "Please enter a valid name (only letters and - or space are accepted).\nEx: Marie-Agathe";
+            firstNameField.setCustomValidity("Veuillez saisir un prenom valide");
         }
     });
 
     let lastNameField = document.getElementById("lastName");
+    lastNameField.value = "";
     lastNameField.addEventListener("input", (e) => { 
         let lastName = e.target.value;
         if(NameRegex.test(lastName)){
             document.getElementById("lastNameErrorMsg").innerText = "";
+            lastNameField.setCustomValidity("");
         } else {
-            document.getElementById("lastNameErrorMsg").innerText = "Please enter a valid name (only letters and - or space are accepted).\nEx: Du Pont.";
+            document.getElementById("lastNameErrorMsg").innerText = "Please enter a valid name (only letters and - or space are accepted).\nEx: Du Pont";
+            lastNameField.setCustomValidity("Veuillez saisir un nom valide");
         }
     });
 
@@ -230,39 +243,94 @@ function formValidation() {
     // $                                        - end of string
     // /i                                       - a case insensitive modifier
     let addressField = document.getElementById("address");
+    addressField.value = "";
     addressField.addEventListener("input", (e) => { 
         let address = e.target.value;
         if(addressRegex.test(address)){
             document.getElementById("addressErrorMsg").innerText = "";
+            addressField.setCustomValidity("");
         } else {
             document.getElementById("addressErrorMsg").innerText = "Please enter a valid address (only letters, numbers and space - , or . are accepted).\nEx: 15 bis avenue du G.Leclerc, apt 12-C";
+            addressField.setCustomValidity("Veuillez saisir une addresse valide");
         }
     });
 
     const cityRegex = /^(?=.{1,50}$)[a-z]+(?:[-\s][a-z]+)*$/i;
     //same expression as nameRegex
     let cityField = document.getElementById("city");
+    cityField.value = "";
     cityField.addEventListener("input", (e) => { 
         let city = e.target.value;
         if(cityRegex.test(city)){
             document.getElementById("cityErrorMsg").innerText = "";
+            cityField.setCustomValidity("");
         } else {
-            document.getElementById("cityErrorMsg").innerText = "Please enter a valid country name (only letters and - or space are accepted).\nEx: Nogent-sur-Seine.";
+            document.getElementById("cityErrorMsg").innerText = "Please enter a valid city name (only letters and - or space are accepted).\nEx: Nogent-sur-Seine";
+            cityField.setCustomValidity("Veuillez saisir un nom de ville valide");
         }
     });
 
     const emailRegex = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
 
     let emailField = document.getElementById("email");
+    emailField.value = "";
     emailField.addEventListener("input", (e) => { 
         let email = e.target.value;
         if(emailRegex.test(email)){
             document.getElementById("emailErrorMsg").innerText = "";
+            emailField.setCustomValidity("");
+            // console.log(email);
+            // console.log(email.value);
         } else {
-            document.getElementById("emailErrorMsg").innerText = "Please enter a valid email (only letters and - or space are accepted).\nEx: Marie-Agathe.";
+            document.getElementById("emailErrorMsg").innerText = "Please enter a valid email (only letters and - or space are accepted).\nEx: Jean-truc@heberg.com";
+            emailField.setCustomValidity("Veuillez saisir une addresse électronique valide");
         }
     });
 
+    let cartForm = document.querySelector(".cart__order__form");
+    cartForm.addEventListener("submit", sendForm);
+
+}
+
+function sendForm(event) {
+    event.preventDefault();
+    console.log("ok");
+
+    const contact = {
+        firstName : firstName.value,
+        lastName : lastName.value,
+        address : address.value,
+        city : city.value,
+        email : email.value
+    }
+
+    let cart = getCart();
+    let products = [];
+    for(product in cart) {
+        products.push(cart[product].id);
+    }
+
+    fetch(apiUrl + 'order', {
+        method: "POST",
+        headers: {
+            'Accept': 'application/json', 
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({contact, products})
+    })
+    .then(function(res) {
+        if(res.ok) {
+            return res.json();
+        }
+    })
+    .then(function(value) {
+        // console.log(value.orderId);
+        window.location.href = 'confirmation.html?orderId=' + value.orderId;
+    })
+    .catch (function(err) {
+        // Une erreur s'est produite
+        console.log(err);
+    })
 }
 
 

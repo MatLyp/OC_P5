@@ -302,8 +302,8 @@ function formValidation() {
 }
 
 function sendForm(event) {
+
     event.preventDefault();
-    console.log("ok");
 
     const contact = {
         firstName : firstName.value,
@@ -314,34 +314,42 @@ function sendForm(event) {
     }
 
     let cart = getCart();
-    let products = [];
-    for(let product in cart) {
-        products.push(cart[product].id);
+
+    if(cart.length == 0) {
+        
+        alert("Votre panier est vide.");
+    } else {
+
+        let products = [];
+        for(let product in cart) {
+            products.push(cart[product].id);
+        }
+    
+        fetch(apiUrl + 'order', {
+            method: "POST",
+            headers: {
+                'Accept': 'application/json', 
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({contact, products})
+        })
+        .then(function(res) {
+            if(res.ok) {
+                return res.json();
+            }
+        })
+        .then(function(value) {
+            // console.log(value.orderId);
+            window.location.href = 'confirmation.html?orderId=' + value.orderId;
+        })
+        .catch (function(err) {
+            // Une erreur s'est produite
+            console.log(err);
+        })
     }
 
-    fetch(apiUrl + 'order', {
-        method: "POST",
-        headers: {
-            'Accept': 'application/json', 
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({contact, products})
-    })
-    .then(function(res) {
-        if(res.ok) {
-            return res.json();
-        }
-    })
-    .then(function(value) {
-        // console.log(value.orderId);
-        window.location.href = 'confirmation.html?orderId=' + value.orderId;
-    })
-    .catch (function(err) {
-        // Une erreur s'est produite
-        console.log(err);
-    })
+    
 }
-
 
 
 getData(createCartElems, displayTotalCartQuantity, displayTotalCartPrice);

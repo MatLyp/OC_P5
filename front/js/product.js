@@ -1,6 +1,6 @@
-const apiUrl = "http://localhost:3000/api/products/";
+const apiUrl = "http://localhost:3000/api/products/";   //lien vers l'api
 
-//Pour obtenir l'ID du produit transmis à l'url
+// fonction de recuperation de l'ID du produit transmis à l'url
 function getProductId() {
     let pageUrl = window.location.href;
     let url = new URL(pageUrl);
@@ -8,6 +8,29 @@ function getProductId() {
     return productId;
 }
 
+// récuperation des données de l'api pour un seul produit selectionné grâce à son id (GET method)
+function getProduct() {
+    fetch(apiUrl + getProductId())
+        .then (function(res) {
+            if (res.ok) {
+                return res.json();
+            }
+        })
+        .then (function(value) {
+            // création de la page produit
+            createProductElems(value);
+            // détection du click sur bouton "ajouter au panier" et appel de la fonction correspondante
+            document.getElementById("addToCart").addEventListener("click", () => {
+                addToCart(value);
+            });
+        })
+        .catch (function(err) {
+            // en cas d'erreur l'affiche dans la console
+            console.log(err);
+        })
+}
+
+//recuperation et parsing du panier stocké dans le localStorage ou renvoi d'un tableau vide si aucun panier
 function getCart(){
     let cart = localStorage.getItem("cart");
     if (cart == null) {
@@ -17,15 +40,11 @@ function getCart(){
     }
 }
 
+//enregistrement des modification du panier dans le localStorage au format JSON
 function saveCart(cart) {
     localStorage.setItem("cart", JSON.stringify(cart));
 }
 
-// function addToCart(product) {
-//     let cart = getCart();
-//     cart.push(product);
-//     saveCart(cart);
-// }
 
 // fonction qui ajoute le produit au panier (couleur/quantité) en stockant les information dans le localStorage.
 function addToCart(productDatas){
@@ -39,10 +58,10 @@ function addToCart(productDatas){
     } else {
         let cart = getCart();
 
-        const indexInCart = cart.findIndex((element) => element.id === `${productDatas._id}` && element.color === colorSelect);
         // .findIndex() renvoi -1 si aucun element correspondant aux valeurs n'a été trouvé (id et couleur)
         // s'il trouve un element, on incremente la quantité actuelle de l'element par la quantité choisie
-        // sinon, on créé un nouvel objet que l'on ajoute au tableau cart.
+        // sinon, on créé un nouvel objet que l'on ajoute au tableau cart(le panier).
+        const indexInCart = cart.findIndex((element) => element.id === `${productDatas._id}` && element.color === colorSelect);
         if (indexInCart !== -1) {
             let productQuantity = parseInt(cart[indexInCart].quantity);
             productQuantity += parseInt(quantitySelect);
@@ -65,45 +84,27 @@ function addToCart(productDatas){
 // fonction de création de la page produit en fonction du produit séléctionné
 function createProductElems(productInfo) {
 
+    //insertion dans le titre du nom du produit
     document.querySelector("title").textContent = `${productInfo.name}`;
 
+    //<img> du produit et ajout au DOM
     const createProductImg = document.createElement("img");
     createProductImg.setAttribute("src", `${productInfo.imageUrl}`);
     createProductImg.setAttribute("alt", `${productInfo.altTxt}`);
-
     document.querySelector("main div section article div").appendChild(createProductImg);
 
+    //insertion des infos du produit (nom, prix et description)
     document.getElementById("title").textContent = `${productInfo.name}`;
     document.getElementById("price").textContent = `${productInfo.price}`;
     document.getElementById("description").textContent = `${productInfo.description}`;
 
+    //Pour chaque couleur disponible pour un même produit, création et ajout au DOM des options de selection de chaque couleur
     for (let i in productInfo.colors) {
         const createProductColorsOptions = document.createElement("option");
         createProductColorsOptions.setAttribute("value", `${productInfo.colors[i]}`);
         createProductColorsOptions.textContent = `${productInfo.colors[i]}`;
         document.getElementById("colors").appendChild(createProductColorsOptions);
     }
-}
-
-function getProduct() {
-    fetch(apiUrl + getProductId())
-        .then (function(res) {
-            if (res.ok) {
-                return res.json();
-            }
-        })
-        .then (function(value) {
-            // création de la page produit
-            createProductElems(value);
-            // détection du click sur bouton "ajouter au panier" appel de la fonction correspondante
-            document.getElementById("addToCart").addEventListener("click", () => {
-                addToCart(value);
-            });
-        })
-        .catch (function(err) {
-            // Une erreur s'est produite
-            console.log(err);
-        })
 }
 
 getProduct();

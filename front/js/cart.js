@@ -1,7 +1,7 @@
-const apiUrl = "http://localhost:3000/api/products/";
+const apiUrl = "http://localhost:3000/api/products/";   //lien vers l'api
 
-function getData(...funct) {
-
+//function de récuperation des données de l'api (GET method)
+function getData() {
     fetch(apiUrl)
         .then (function(res) {
             if (res.ok) {
@@ -9,28 +9,18 @@ function getData(...funct) {
             }
         })
         .then (function(value) {
-            //commentaires!!
-            for(let i=0; i<funct.length; i++){
-                funct[i](value);
-            }
-
-            let deleteItem = document.getElementsByClassName("deleteItem");
-            for (let i=0; i<deleteItem.length; i++) {
-                deleteItem[i].addEventListener("click", deleteCartElems);
-            }
-        
-            let itemQty = document.getElementsByClassName("itemQuantity");
-            for (let i=0; i<itemQty.length; i++) {
-                itemQty[i].addEventListener("change", changeQuantity);
-            }
+            //Pour chaque produit ajouté au panier, appel de la fonction createCartElems grâce aux données recuperées via l'api
+            createCartElems(value);
 
         })
         .catch (function(err) {
-            // Une erreur s'est produite
+            // en cas d'erreur l'affiche dans la console
             console.log(err);
         })
 }
 
+//creation des elements html et leurs attributs pour chaque produit du panier
+//prend en argument les données de l'api
 function createCartElems(cartProduct) {
 
     let storedCart = getCart();
@@ -110,7 +100,20 @@ function createCartElems(cartProduct) {
       
     })
 
+    let itemQty = document.getElementsByClassName("itemQuantity");
+    for (let i=0; i<itemQty.length; i++) {
+        itemQty[i].addEventListener("change", changeQuantity);
+    }
+
+    let deleteItem = document.getElementsByClassName("deleteItem");
+    for (let i=0; i<deleteItem.length; i++) {
+        deleteItem[i].addEventListener("click", deleteCartElems);
+    }
+
+    displayTotalCartQuantity();
+    displayTotalCartPrice();
 }
+
 
 function getCart(){
 
@@ -129,20 +132,6 @@ function saveCart(cart) {
 }
 
 
-function changeQuantity(event) {
-
-    let cart = getCart();
-    let newQuantity = event.target.value;
-    let articleHtmlElem = event.target.closest('article');
-    const indexInCart = cart.findIndex((element) => element.id === articleHtmlElem.dataset.id && element.color === articleHtmlElem.dataset.color);
-    cart[indexInCart].quantity = newQuantity;
-    saveCart(cart);
-
-    displayTotalCartQuantity();
-    displayTotalCartPrice();
-}
-
-
 function displayTotalCartQuantity() {
 
     let totalQuantity = 0;
@@ -155,20 +144,7 @@ function displayTotalCartQuantity() {
 }
 
 
-// function displayTotalCartPrice(cartProduct) {
-
-//     let totalPrice = 0;
-//     let storedCart = getCart();
-
-//     storedCart.forEach(element => {
-//         let index = cartProduct.findIndex( e => e._id === element.id);
-//         totalPrice += parseInt(`${cartProduct[index].price}`) * element.quantity;
-//     });
-
-//     document.getElementById("totalPrice").innerText = totalPrice;
-// }
-
-function displayTotalCartPrice() {  // test no api call function version
+function displayTotalCartPrice() {
 
     let storedCart = getCart();
     let elemQuantity = [];
@@ -180,13 +156,25 @@ function displayTotalCartPrice() {  // test no api call function version
 
     let priceHtmlElems = document.getElementsByClassName("cart__item__content__description")
 
-    for(let i=0; i<priceHtmlElems.length; i++) {
+    for (let i=0; i<priceHtmlElems.length; i++) {
         totalPrice += parseInt(priceHtmlElems[i].lastChild.innerText.replace(" €", "")) * elemQuantity[i];
-        console.log(totalPrice);
-        // console.log(priceHtmlElems[i].lastChild.innerText.replace(" €", ""));
     }
 
     document.getElementById("totalPrice").innerText = totalPrice;
+}
+
+
+function changeQuantity(event) {
+
+    let cart = getCart();
+    let newQuantity = event.target.value;
+    let articleHtmlElem = event.target.closest('article');
+    const indexInCart = cart.findIndex((element) => element.id === articleHtmlElem.dataset.id && element.color === articleHtmlElem.dataset.color);
+    cart[indexInCart].quantity = newQuantity;
+    saveCart(cart);
+
+    displayTotalCartQuantity();
+    displayTotalCartPrice();
 }
 
 
@@ -214,7 +202,7 @@ function formValidation() {
     const NameRegex = /^(?=.{1,50}$)[a-z]+(?:[-\s][a-z]+)*$/i;
     // ^                 - start of string
     // (?=.{1,50}$)      - there must be 1 to 50 chars in the string
-    // [a-z]+            - 1 or more ASCII letters
+    // [a-z]             - 1 or more ASCII letters
     // (?:[-\s][a-z]+)*  - 0 or more sequences of - or whitespace and 1 or more ASCII letters
     // $                 - end of string
     // /i                - a case insensitive modifier
@@ -222,7 +210,7 @@ function formValidation() {
     firstNameField.value = "";
     firstNameField.addEventListener("input", (e) => { 
         let firstName = e.target.value;
-        if(NameRegex.test(firstName)){
+        if (NameRegex.test(firstName)) {
             document.getElementById("firstNameErrorMsg").innerText = "";
             firstNameField.setCustomValidity("");
         } else {
@@ -235,7 +223,7 @@ function formValidation() {
     lastNameField.value = "";
     lastNameField.addEventListener("input", (e) => { 
         let lastName = e.target.value;
-        if(NameRegex.test(lastName)){
+        if (NameRegex.test(lastName)) {
             document.getElementById("lastNameErrorMsg").innerText = "";
             lastNameField.setCustomValidity("");
         } else {
@@ -247,7 +235,7 @@ function formValidation() {
     const addressRegex = /^(?=.{1,100}$)[a-z0-9]+(?:([-.,\s]|[,][\s]|[.][\s])[a-z0-9]+)*$/i;
     // ^                                        - start of string
     // (?=.{1,100}$)                            - there must be 1 to 100 chars in the string
-    // [a-z0-9]+                                - 1 or more ASCII letters or number
+    // [a-z0-9]                                 - 1 or more ASCII letters or number
     // (?:([-.,\s]|[,][\s]|[.][\s])[a-z0-9]+)*  - 0 or more sequences of ((- . , or whitespace) or (. followed by whitespace) or (, followed by whitespace) and 1 or more ASCII letter or number)
     // $                                        - end of string
     // /i                                       - a case insensitive modifier
@@ -255,7 +243,7 @@ function formValidation() {
     addressField.value = "";
     addressField.addEventListener("input", (e) => { 
         let address = e.target.value;
-        if(addressRegex.test(address)){
+        if (addressRegex.test(address)) {
             document.getElementById("addressErrorMsg").innerText = "";
             addressField.setCustomValidity("");
         } else {
@@ -270,7 +258,7 @@ function formValidation() {
     cityField.value = "";
     cityField.addEventListener("input", (e) => { 
         let city = e.target.value;
-        if(cityRegex.test(city)){
+        if (cityRegex.test(city)) {
             document.getElementById("cityErrorMsg").innerText = "";
             cityField.setCustomValidity("");
         } else {
@@ -279,17 +267,22 @@ function formValidation() {
         }
     });
 
-    const emailRegex = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
-
+    const emailRegex = /^[a-z0-9_.+-]+@[a-z0-9-]+\.[a-z0-9-.]+$/i;
+    // ^             - start of string
+    // [a-z0-9_.+-]  - 1 or more ASCII letters, number or underscore, dot, plus or hyphen
+    // @             - At sign required
+    // [a-z0-9-]     - 1 or more ASCII letters, number or hyphen
+    // \.            - dot required
+    // [a-z0-9-.]    - 1 or more ASCII letters, number hyphen or dot
+    // $             - end of string
+    // /i            - a case insensitive modifier
     let emailField = document.getElementById("email");
     emailField.value = "";
     emailField.addEventListener("input", (e) => { 
         let email = e.target.value;
-        if(emailRegex.test(email)){
+        if (emailRegex.test(email)) {
             document.getElementById("emailErrorMsg").innerText = "";
             emailField.setCustomValidity("");
-            // console.log(email);
-            // console.log(email.value);
         } else {
             document.getElementById("emailErrorMsg").innerText = "Please enter a valid email (only letters and - or space are accepted).\nEx: Jean-truc@heberg.com";
             emailField.setCustomValidity("Veuillez saisir une addresse électronique valide");
@@ -316,7 +309,7 @@ function sendForm(event) {
     let cart = getCart();
 
     if(cart.length == 0) {
-        
+
         alert("Votre panier est vide.");
     } else {
 
@@ -351,6 +344,6 @@ function sendForm(event) {
     
 }
 
-
-getData(createCartElems, displayTotalCartQuantity, displayTotalCartPrice);
+// getData(createCartElems, displayTotalCartQuantity, displayTotalCartPrice);
+getData();
 formValidation();

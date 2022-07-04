@@ -26,57 +26,53 @@ function createCartElems(cartProduct) {
     let storedCart = getCart();
 
     storedCart.forEach(element => {
-
+        // trouve l'index du produit dans l'api correspondant au produit stocké dans le panier
         let index = cartProduct.findIndex( e => e._id === element.id);
-
+        // <article>
         const createCartArticle = document.createElement("article");
         createCartArticle.className = "cart__item"
         createCartArticle.setAttribute("data-id", element.id);
         createCartArticle.setAttribute("data-color", element.color);
         document.getElementById("cart__items").appendChild(createCartArticle);
-    
+        // <div>
         const createCartDivImg = document.createElement("div");
         createCartDivImg.className = "cart__item__img";
-    
-        createCartArticle.appendChild(createCartDivImg);
-    
+        // <img>
         const createCartImg = document.createElement("img");
         createCartImg.setAttribute("src", `${cartProduct[index].imageUrl}`);
         createCartImg.setAttribute("alt", `${cartProduct[index].altTxt}`);
-
+        // ajout des elements (article > div > image)
+        createCartArticle.appendChild(createCartDivImg);
         createCartDivImg.appendChild(createCartImg);
-
+        // <div>
         const createCartDivContent = document.createElement("div");
         createCartDivContent.className = "cart__item__content";        
-
-        createCartArticle.appendChild(createCartDivContent);
-
+        // <div>
         const createCartDivContentDescription = document.createElement("div");
         createCartDivContentDescription.className = "cart__item__content__description";
-
-        createCartDivContent.appendChild(createCartDivContentDescription);
-
+        // <h2>
         const createCartContentTitle = document.createElement("h2");
         createCartContentTitle.innerText = `${cartProduct[index].name}`;
+        // <p>
         const createCartContentColor = document.createElement("p");
         createCartContentColor.innerText = element.color;
+        // <p>
         const createCartContentPrice = document.createElement("p");
         createCartContentPrice.innerText = `${cartProduct[index].price}` + " €";
-
+        // ajout des elements (article > div > div > h2, p, p)
+        createCartArticle.appendChild(createCartDivContent);
+        createCartDivContent.appendChild(createCartDivContentDescription);
         createCartDivContentDescription.append(createCartContentTitle, createCartContentColor, createCartContentPrice);
-
+        // <div>
         const createCartDivContentSettings = document.createElement("div");
-        createCartDivContentSettings.className = "cart__item__content__settings";
-
-        createCartDivContent.appendChild(createCartDivContentSettings);
-
+        createCartDivContentSettings.className = "cart__item__content__settings";        
+        // <div>
         const createCartContentSettingsQty = document.createElement("div");
         createCartContentSettingsQty.className = "cart__item__content__settings__quantity";
-
-        createCartDivContentSettings.appendChild(createCartContentSettingsQty);
-
+        // <p>
         const createCartContentQty = document.createElement("p");
         createCartContentQty.innerText = "Qté : ";
+        // <input>
         const createCartInputQty = document.createElement("input");
         createCartInputQty.setAttribute("type", "number");
         createCartInputQty.setAttribute("class", "itemQuantity");
@@ -84,27 +80,29 @@ function createCartElems(cartProduct) {
         createCartInputQty.setAttribute("min", "1");
         createCartInputQty.setAttribute("max", "100");
         createCartInputQty.setAttribute("value", element.quantity);
-
+        // ajout des elements (article > div > div > div > p, input)
+        createCartDivContent.appendChild(createCartDivContentSettings);
+        createCartDivContentSettings.appendChild(createCartContentSettingsQty);
         createCartContentSettingsQty.append(createCartContentQty, createCartInputQty);
-
+        // <div>
         const createCartDivContentSettingsDelete = document.createElement("div");
         createCartDivContentSettingsDelete.className = "cart__item__content__settings__delete";
-
-        createCartDivContentSettings.appendChild(createCartDivContentSettingsDelete);
-
         const createCartDeleteButton = document.createElement("p");
         createCartDeleteButton.className = "deleteItem";
         createCartDeleteButton.innerText = "Supprimer";
-
+        // ajout des elements (article > div > div > div > p)
+        createCartDivContentSettings.appendChild(createCartDivContentSettingsDelete);
         createCartDivContentSettingsDelete.appendChild(createCartDeleteButton);
       
     })
 
+    // appel la fonction changeQuantity à chaque changement de valeur des inputs de quantité des elements du panier
     let itemQty = document.getElementsByClassName("itemQuantity");
     for (let i=0; i<itemQty.length; i++) {
         itemQty[i].addEventListener("change", changeQuantity);
     }
 
+    // appel la fonction deleteCartElems à chaque clic sur le bouton de suppression d'un element du panier
     let deleteItem = document.getElementsByClassName("deleteItem");
     for (let i=0; i<deleteItem.length; i++) {
         deleteItem[i].addEventListener("click", deleteCartElems);
@@ -114,9 +112,8 @@ function createCartElems(cartProduct) {
     displayTotalCartPrice();
 }
 
-
+//recuperation et parsing du panier stocké dans le localStorage ou renvoi d'un tableau vide si aucun panier
 function getCart(){
-
     let cart = localStorage.getItem("cart");
     if (cart == null) {
         return [];
@@ -125,13 +122,12 @@ function getCart(){
     }
 }
 
-
+//enregistrement des modification du panier dans le localStorage au format JSON
 function saveCart(cart) {
-
     localStorage.setItem("cart", JSON.stringify(cart));
 }
 
-
+// fonction de calcul et d'affichage du nombre total de produit dans le panier
 function displayTotalCartQuantity() {
 
     let totalQuantity = 0;
@@ -143,7 +139,8 @@ function displayTotalCartQuantity() {
     document.getElementById("totalQuantity").innerText = totalQuantity;
 }
 
-
+// fonction de calcul et d'affichage du coût total des produits dans le panier
+// la fonction recupère le prix du produit dans la description de celui-ci pour ne pas faire appel à l'api à chaque modif du panier et le multiplie par sa quantité pour chaque produit ajouté au panier
 function displayTotalCartPrice() {
 
     let storedCart = getCart();
@@ -163,12 +160,13 @@ function displayTotalCartPrice() {
     document.getElementById("totalPrice").innerText = totalPrice;
 }
 
-
+// fonction de modification de la quantité pour chaque produit
 function changeQuantity(event) {
 
     let cart = getCart();
     let newQuantity = event.target.value;
     let articleHtmlElem = event.target.closest('article');
+
     const indexInCart = cart.findIndex((element) => element.id === articleHtmlElem.dataset.id && element.color === articleHtmlElem.dataset.color);
     cart[indexInCart].quantity = newQuantity;
     saveCart(cart);
@@ -177,17 +175,17 @@ function changeQuantity(event) {
     displayTotalCartPrice();
 }
 
-
+// fonction de suppression d'un produit du panier
 function deleteCartElems(event) {
 
     let cart = getCart();
     let articleHtmlElem = event.target.closest('article');
 
     const indexInCart = cart.findIndex((element) => element.id === articleHtmlElem.dataset.id && element.color === articleHtmlElem.dataset.color);
-
+    // suppression du produit dans le panier
     cart.splice(indexInCart, 1);
     saveCart(cart);
-
+    // suppression des elements du dom
     while (articleHtmlElem.lastElementChild){
         articleHtmlElem.removeChild(articleHtmlElem.lastElementChild);
     }
@@ -197,6 +195,7 @@ function deleteCartElems(event) {
     displayTotalCartPrice();
 }
 
+// fonction de verification des champs du formulaire avant envoi
 function formValidation() {
 
     const NameRegex = /^(?=.{1,50}$)[a-z]+(?:[-\s][a-z]+)*$/i;
@@ -291,9 +290,10 @@ function formValidation() {
 
     let cartForm = document.querySelector(".cart__order__form");
     cartForm.addEventListener("submit", sendForm);
-
 }
 
+// fonction qui créer l'objet contact grâce aux données saisies dans le formulaire
+// et le renvoi à l'api avec les produits du panier puis redirige vers la page de confirmation
 function sendForm(event) {
 
     event.preventDefault();
@@ -308,8 +308,8 @@ function sendForm(event) {
 
     let cart = getCart();
 
+    // renvoi vers la page confirmation que si le panier n'est pas vide
     if(cart.length == 0) {
-
         alert("Votre panier est vide.");
     } else {
 
@@ -317,13 +317,15 @@ function sendForm(event) {
         for(let product in cart) {
             products.push(cart[product].id);
         }
-    
+        
+        // envoi de la commande à l'api (POST)
         fetch(apiUrl + 'order', {
             method: "POST",
             headers: {
                 'Accept': 'application/json', 
                 'Content-Type': 'application/json'
             },
+            // ajout de l'objet contact et du panier
             body: JSON.stringify({contact, products})
         })
         .then(function(res) {
@@ -332,7 +334,8 @@ function sendForm(event) {
             }
         })
         .then(function(value) {
-            // console.log(value.orderId);
+            // clear du localStorage et redirection
+            localStorage.clear();
             window.location.href = 'confirmation.html?orderId=' + value.orderId;
         })
         .catch (function(err) {
@@ -340,10 +343,7 @@ function sendForm(event) {
             console.log(err);
         })
     }
-
-    
 }
 
-// getData(createCartElems, displayTotalCartQuantity, displayTotalCartPrice);
 getData();
 formValidation();
